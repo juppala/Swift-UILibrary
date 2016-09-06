@@ -3,13 +3,13 @@
 
 
 ### AccordionTableView
-![a relative link](./UILibrary/views/AccordionTableView.swift)
+[a relative link](./UILibrary/views/AccordionTableView.swift)
 
 ### GradientNavigationBar
-![a relative link](./UILibrary/views/GradientNavigationBar.swift)
+[a relative link](./UILibrary/views/GradientNavigationBar.swift)
 
 ### GradientUIView
-![a relative link](./UILibrary/views/GradientUIView.swift)
+[a relative link](./UILibrary/views/GradientUIView.swift)
 
 ### RoundedUIButton
-![a relative link](./UILibrary/views/RoundedUIButton.swift)
+[a relative link](./UILibrary/views/RoundedUIButton.swift)
