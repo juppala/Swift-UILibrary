@@ -2,14 +2,14 @@
 ####Swift reusable components 
 
 
-####AccordionTableView
-![ui](./UILibrary/views/AccordionTableView.swift)
+### AccordionTableView
+![a relative link](./UILibrary/views/AccordionTableView.swift)
 
-####GradientNavigationBar
-![ui](./UILibrary/views/GradientNavigationBar.swift)
+### GradientNavigationBar
+![a relative link](./UILibrary/views/GradientNavigationBar.swift)
 
-####GradientUIView
-![ui](./UILibrary/views/GradientUIView.swift)
+### GradientUIView
+![a relative link](./UILibrary/views/GradientUIView.swift)
 
-####RoundedUIButton
-![ui](./UILibrary/views/RoundedUIButton.swift)
+### RoundedUIButton
+![a relative link](./UILibrary/views/RoundedUIButton.swift)
