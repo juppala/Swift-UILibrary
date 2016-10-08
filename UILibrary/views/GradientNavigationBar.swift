@@ -9,13 +9,13 @@
 import UIKit
 
 @IBDesignable
-class GradientNavigationBar: UINavigationBar {
+open class GradientNavigationBar: UINavigationBar {
     
     @IBInspectable
     var colorTop:UIColor = UIColor(red: 192.0/255.0, green: 38.0/255.0, blue: 42.0/255.0, alpha: 1.0) {
         didSet {
             setNeedsDisplay()
-            setupView()
+            //setupView()
         }
     }
     
@@ -27,24 +27,24 @@ class GradientNavigationBar: UINavigationBar {
         }
     }
     
-    private func setupView() {
+    fileprivate func setupView() {
         let theLayer = CAGradientLayer()
         theLayer.frame = self.bounds
         theLayer.frame.size.height = 66.0
         
-        theLayer.colors = [colorTop.CGColor, colorBottom.CGColor]
+        theLayer.colors = [colorTop.cgColor, colorBottom.cgColor]
         
-        theLayer.startPoint = CGPointMake(0.5, 0.0)
-        theLayer.endPoint = CGPointMake(0.5, 1.0)
+        theLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
+        theLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
         
         UIGraphicsBeginImageContext(theLayer.bounds.size)
         if let context = UIGraphicsGetCurrentContext() {
-            theLayer.renderInContext(context)
+            theLayer.render(in: context)
             let image = UIGraphicsGetImageFromCurrentImageContext()
             UIGraphicsEndImageContext()
             
             // Set the UIImage as background property
-            setBackgroundImage(image, forBarMetrics: UIBarMetrics.Default)
+            setBackgroundImage(image, for: UIBarMetrics.default)
         }
     }
 }

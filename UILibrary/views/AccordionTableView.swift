@@ -8,21 +8,21 @@
 
 import UIKit
 
-@objc protocol AccordionTableViewDelegate: UITableViewDelegate {
-    optional func tableView(tableView: AccordionTableView, willOpenSection section: Int, withHeader header: UITableViewHeaderFooterView)
+@objc public protocol AccordionTableViewDelegate: UITableViewDelegate {
+    @objc optional func tableView(_ tableView: AccordionTableView, willOpenSection section: Int, withHeader header: UITableViewHeaderFooterView)
     
-    optional func tableView(tableView: AccordionTableView, didOpenSection section: Int, withHeader header: UITableViewHeaderFooterView)
+    @objc optional func tableView(_ tableView: AccordionTableView, didOpenSection section: Int, withHeader header: UITableViewHeaderFooterView)
     
-    optional func tableView(tableView: AccordionTableView, willCloseSection section: Int, withHeader header: UITableViewHeaderFooterView)
+    @objc optional func tableView(_ tableView: AccordionTableView, willCloseSection section: Int, withHeader header: UITableViewHeaderFooterView)
     
-    optional func tableView(tableView: AccordionTableView, didCloseSection section: Int, withHeader header: UITableViewHeaderFooterView)
+    @objc optional func tableView(_ tableView: AccordionTableView, didCloseSection section: Int, withHeader header: UITableViewHeaderFooterView)
 }
 
-protocol AccordionTableViewHeaderViewDelegate {
-    func headerView(sectionHeaderView: AccordionTableViewHeaderView, didSelectHeaderInSection section: Int)
+public protocol AccordionTableViewHeaderViewDelegate {
+    func headerView(_ sectionHeaderView: AccordionTableViewHeaderView, didSelectHeaderInSection section: Int)
 }
 
-class AccordionTableViewHeaderView: UITableViewHeaderFooterView {
+open class AccordionTableViewHeaderView: UITableViewHeaderFooterView {
     /*!
      @desc  The section which this header view is part of.
      */
@@ -30,25 +30,26 @@ class AccordionTableViewHeaderView: UITableViewHeaderFooterView {
     
     var delegate: AccordionTableViewHeaderViewDelegate?
     
-    override func awakeFromNib() {
+    override open func awakeFromNib() {
         super.awakeFromNib()
         self.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(AccordionTableViewHeaderView.touchedHeaderView(_:))))
     }
     
-    func touchedHeaderView(recognizer: UITapGestureRecognizer) {
+    func touchedHeaderView(_ recognizer: UITapGestureRecognizer) {
         if let delegate = self.delegate {
             delegate.headerView(self, didSelectHeaderInSection: self.section)
         }
     }
 }
 
-class AccordionTableView: UITableView, UITableViewDataSource, UITableViewDelegate, AccordionTableViewDelegate, AccordionTableViewHeaderViewDelegate {
+open class AccordionTableView: UITableView, UITableViewDataSource, AccordionTableViewDelegate, AccordionTableViewHeaderViewDelegate {
     
     var subclassDelegate: AccordionTableViewDelegate!
     
     var subclassDataSource: UITableViewDataSource!
     
-    var openedSections: NSMutableSet = NSMutableSet()
+    open var openedSections: NSMutableSet = NSMutableSet()
+    
     var numOfRowsForSection: NSMutableDictionary = NSMutableDictionary()
     
     /*!
@@ -62,7 +63,8 @@ class AccordionTableView: UITableView, UITableViewDataSource, UITableViewDelegat
      
      The default value is NO.
      */
-    var allowMultipleSectionsOpen: Bool = false
+    open var allowMultipleSectionsOpen: Bool = false
+    
     /*!
      @desc  If set to YES, one section will always be open.
      
@@ -109,78 +111,78 @@ class AccordionTableView: UITableView, UITableViewDataSource, UITableViewDelegat
         self.initializeVars()
     }
     
-    required init(coder aDecoder: NSCoder) {
+    required public init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)!
         self.initializeVars()
     }
     
-    func isSectionOpen(section: Int) -> Bool {
-        return self.openedSections.containsObject(section)
+    func isSectionOpen(_ section: Int) -> Bool {
+        return self.openedSections.contains(section)
     }
     
-    func isAlwaysOpenedSection(section: Int) -> Bool {
+    func isAlwaysOpenedSection(_ section: Int) -> Bool {
         return self.sectionsAlwaysOpen.contains(section)
     }
     
-    func addOpenedSection(section: Int) {
-        self.openedSections.addObject(section)
+    func addOpenedSection(_ section: Int) {
+        self.openedSections.add(section)
     }
     
-    func removeOpenedSection(section: Int) {
-        self.openedSections.removeObject(section)
+    func removeOpenedSection(_ section: Int) {
+        self.openedSections.remove(section)
     }
     
-    func getIndexPathsForSection(section: Int) -> [AnyObject] {
-        let numOfRows: Int = Int((self.numOfRowsForSection[section]?.intValue)!)
+    func getIndexPathsForSection(_ section: Int) -> [AnyObject] {
+        let numOfRows: Int = self.numOfRowsForSection[section] as! Int
         var indexPaths: [AnyObject] = NSMutableArray() as [AnyObject]
         for row in 0 ..< numOfRows {
-            indexPaths.append(NSIndexPath(forRow: row, inSection: section))
+            indexPaths.append(IndexPath(row: row, section: section) as AnyObject)
         }
         return indexPaths
     }
     
-    func toggleSection(section: Int) {
-        let headerView: AccordionTableViewHeaderView = (self.headerViewForSection(section) as! AccordionTableViewHeaderView)
+    func toggleSection(_ section: Int) {
+        let headerView: AccordionTableViewHeaderView = (self.headerView(forSection: section) as! AccordionTableViewHeaderView)
         self.headerView(headerView, didSelectHeaderInSection: section)
     }
     
-    override var delegate: UITableViewDelegate? {
+    override open var delegate: UITableViewDelegate? {
         didSet {
-            let castedDelegate = unsafeBitCast(delegate, AccordionTableViewDelegate.self)
+            let castedDelegate = unsafeBitCast(delegate, to: AccordionTableViewDelegate.self)
             self.subclassDelegate = castedDelegate
             super.delegate = self
         }
     }
     
-    override var dataSource: UITableViewDataSource? {
+    override open var dataSource: UITableViewDataSource? {
         didSet {
             self.subclassDataSource = dataSource
             super.dataSource = self
         }
     }
     
-    override func forwardingTargetForSelector(aSelector: Selector) -> AnyObject {
-        if self.subclassDataSource!.respondsToSelector(aSelector) {
+    open func forwardingTarget(for aSelector: Selector) -> AnyObject {
+        if self.subclassDataSource!.responds(to: aSelector) {
             return self.subclassDataSource!
         }
-        else if self.subclassDelegate!.respondsToSelector(aSelector) {
+        else if self.subclassDelegate!.responds(to: aSelector) {
             return self.subclassDelegate!
         }
-        return super.forwardingTargetForSelector(aSelector)!
+        return super.forwardingTarget(for: aSelector)! as AnyObject
     }
     
-    override func respondsToSelector(aSelector: Selector) -> Bool {
-        if super.respondsToSelector(aSelector) {
+    override open func responds(to aSelector: Selector) -> Bool {
+        if super.responds(to: aSelector) {
             return true
         } else if self.subclassDelegate != nil {
-            return self.subclassDelegate.respondsToSelector(aSelector)
+            return self.subclassDelegate.responds(to: aSelector)
         } else if self.subclassDataSource != nil {
-            return self.subclassDataSource.respondsToSelector(aSelector)
+            return self.subclassDataSource.responds(to: aSelector)
         }
         return false
     }
     
-    private func setSectionsAlwaysOpen(alwaysOpenedSections: [Int]) {
+    fileprivate func setSectionsAlwaysOpen(_ alwaysOpenedSections: [Int]) {
         self.sectionsAlwaysOpen = alwaysOpenedSections
         if sectionsAlwaysOpen.count > 0 {
             for alwaysOpenedSection: Int in sectionsAlwaysOpen {
@@ -189,7 +191,7 @@ class AccordionTableView: UITableView, UITableViewDataSource, UITableViewDelegat
         }
     }
     
-    private func setInitialOpenSections(initialOpenedSections: [Int]) {
+    fileprivate func setInitialOpenSections(_ initialOpenedSections: [Int]) {
         self.initialOpenSections = initialOpenedSections
         if initialOpenSections.count > 0 {
             for section: Int in initialOpenSections {
@@ -198,7 +200,7 @@ class AccordionTableView: UITableView, UITableViewDataSource, UITableViewDelegat
         }
     }
     
-    func headerView(sectionHeaderView: AccordionTableViewHeaderView, didSelectHeaderInSection section: Int) {
+    public func headerView(_ sectionHeaderView: AccordionTableViewHeaderView, didSelectHeaderInSection section: Int) {
         // Do not interact with sections that are always opened
         if self.isAlwaysOpenedSection(section) {
             return
@@ -209,7 +211,7 @@ class AccordionTableView: UITableView, UITableViewDataSource, UITableViewDelegat
             if self.sectionsAlwaysOpen.count > 0 {
                 // Subtract 'sectionsAlwaysOpen' from 'openedSections'
                 var openedSectionsCopy: [Int] = self.openedSections.mutableCopy() as! [Int]
-                openedSectionsCopy = openedSectionsCopy.filter { sectionsAlwaysOpen.indexOf($0) != nil }
+                openedSectionsCopy = openedSectionsCopy.filter { sectionsAlwaysOpen.index(of: $0) != nil }
                 countOfOpenSections = openedSectionsCopy.count
             }
             if countOfOpenSections == 1 && self.isSectionOpen(section) {
@@ -235,103 +237,103 @@ class AccordionTableView: UITableView, UITableViewDataSource, UITableViewDelegat
         self.endUpdates()
     }
     
-    func openSection(section: Int, withHeaderView sectionHeaderView: AccordionTableViewHeaderView, andIndexPaths indexPathsToModify: [AnyObject]) {
-        if self.subclassDelegate.respondsToSelector(#selector(AccordionTableViewDelegate.tableView(_:willOpenSection:withHeader:))) {
+    func openSection(_ section: Int, withHeaderView sectionHeaderView: AccordionTableViewHeaderView, andIndexPaths indexPathsToModify: [AnyObject]) {
+        if self.subclassDelegate.responds(to: #selector(AccordionTableViewDelegate.tableView(_:willOpenSection:withHeader:))) {
             self.subclassDelegate.tableView!(self, willOpenSection: section, withHeader: sectionHeaderView)
         }
-        var insertAnimation: UITableViewRowAnimation = .Top
+        var insertAnimation: UITableViewRowAnimation = .top
         if !self.allowMultipleSectionsOpen {
             for openSection in self.openedSections {
-                if openSection.integerValue < section {
-                    insertAnimation = .Bottom
+                if (openSection as AnyObject).intValue < section {
+                    insertAnimation = .bottom
                 }
             }
         }
         if self.enableAnimationFix {
             if self.openedSections.count > 0 && (section == self.numOfRowsForSection.count - 1 || section == self.numOfRowsForSection.count - 2) && !self.allowsMultipleSelection {
-                insertAnimation = .Fade
+                insertAnimation = .fade
             }
         }
         self.addOpenedSection(section)
         self.beginUpdates()
         CATransaction.setCompletionBlock({
-            if self.subclassDelegate.respondsToSelector(#selector(AccordionTableViewDelegate.tableView(_:didOpenSection:withHeader:))) {
+            if self.subclassDelegate.responds(to: #selector(AccordionTableViewDelegate.tableView(_:didOpenSection:withHeader:))) {
                 self.subclassDelegate.tableView!(self, didOpenSection: section, withHeader: sectionHeaderView)
             }
         })
         
         
-        self.insertRowsAtIndexPaths(indexPathsToModify as! [NSIndexPath], withRowAnimation: insertAnimation)
+        self.insertRows(at: indexPathsToModify as! [IndexPath], with: insertAnimation)
         self.endUpdates()
     }
     
-    func closeSection(section: Int, withHeaderView sectionHeaderView: AccordionTableViewHeaderView, andIndexPaths indexPathsToModify: [AnyObject]) {
-        if self.subclassDelegate.respondsToSelector(#selector(AccordionTableViewDelegate.tableView(_:willCloseSection:withHeader:))) {
+    func closeSection(_ section: Int, withHeaderView sectionHeaderView: AccordionTableViewHeaderView, andIndexPaths indexPathsToModify: [AnyObject]) {
+        if self.subclassDelegate.responds(to: #selector(AccordionTableViewDelegate.tableView(_:willCloseSection:withHeader:))) {
             self.subclassDelegate.tableView!(self, willCloseSection: section, withHeader: sectionHeaderView)
         }
         self.removeOpenedSection(section)
         self.beginUpdates()
         CATransaction.setCompletionBlock({
-            if self.subclassDelegate.respondsToSelector(#selector(AccordionTableViewDelegate.tableView(_:didCloseSection:withHeader:))) {
+            if self.subclassDelegate.responds(to: #selector(AccordionTableViewDelegate.tableView(_:didCloseSection:withHeader:))) {
                 self.subclassDelegate.tableView!(self, didCloseSection: section, withHeader: sectionHeaderView)
             }
         })
-        self.deleteRowsAtIndexPaths(indexPathsToModify as! [NSIndexPath], withRowAnimation: .Top)
+        self.deleteRows(at: indexPathsToModify as! [IndexPath], with: .top)
         self.endUpdates()
     }
     
-    func autoCollapseAllSectionsExceptSection(section: Int) {
+    func autoCollapseAllSectionsExceptSection(_ section: Int) {
         // Get all of the sections that we need to close
         let sectionsToClose: NSMutableSet = NSMutableSet()
         for openedSection in self.openedSections {
-            if openedSection.integerValue != section && !self.isAlwaysOpenedSection(openedSection.integerValue) {
-                sectionsToClose.addObject(openedSection)
+            if (openedSection as AnyObject).intValue != section && !self.isAlwaysOpenedSection((openedSection as AnyObject).intValue) {
+                sectionsToClose.add(openedSection)
             }
         }
         // Close the found sections
         for sectionToClose in sectionsToClose {
-            if self.subclassDelegate.respondsToSelector(#selector(AccordionTableViewDelegate.tableView(_:willCloseSection:withHeader:))) {
-                self.subclassDelegate.tableView!(self, willCloseSection: sectionToClose.integerValue, withHeader: self.headerViewForSection(sectionToClose.integerValue)!)
+            if self.subclassDelegate.responds(to: #selector(AccordionTableViewDelegate.tableView(_:willCloseSection:withHeader:))) {
+                self.subclassDelegate.tableView!(self, willCloseSection: (sectionToClose as AnyObject).intValue, withHeader: self.headerView(forSection: (sectionToClose as AnyObject).intValue)!)
             }
             // Change animations based off which sections are closed
-            var closeAnimation: UITableViewRowAnimation = .Top
-            if section < sectionToClose.integerValue {
-                closeAnimation = .Bottom
+            var closeAnimation: UITableViewRowAnimation = .top
+            if section < (sectionToClose as AnyObject).intValue {
+                closeAnimation = .bottom
             }
             if self.enableAnimationFix {
-                if (sectionToClose.integerValue == self.numOfRowsForSection.count - 1 || sectionToClose.integerValue == self.numOfRowsForSection.count - 2) && !self.allowsMultipleSelection {
-                    closeAnimation = .Fade
+                if ((sectionToClose as AnyObject).intValue == self.numOfRowsForSection.count - 1 || (sectionToClose as AnyObject).intValue == self.numOfRowsForSection.count - 2) && !self.allowsMultipleSelection {
+                    closeAnimation = .fade
                 }
             }
             // Delete the cells for section that is closing
-            let indexPathsToDelete: [AnyObject] = self.getIndexPathsForSection(sectionToClose.integerValue)
-            self.removeOpenedSection(sectionToClose.integerValue)
+            let indexPathsToDelete: [AnyObject] = self.getIndexPathsForSection((sectionToClose as AnyObject).intValue)
+            self.removeOpenedSection((sectionToClose as AnyObject).intValue)
             self.beginUpdates()
             CATransaction.setCompletionBlock({
-                if self.subclassDelegate.respondsToSelector(#selector(AccordionTableViewDelegate.tableView(_:didCloseSection:withHeader:))) {
-                    self.subclassDelegate.tableView!(self, didCloseSection: sectionToClose.integerValue, withHeader: self.headerViewForSection(sectionToClose.integerValue)!)
+                if self.subclassDelegate.responds(to: #selector(AccordionTableViewDelegate.tableView(_:didCloseSection:withHeader:))) {
+                    self.subclassDelegate.tableView!(self, didCloseSection: (sectionToClose as AnyObject).intValue, withHeader: self.headerView(forSection: (sectionToClose as AnyObject).intValue)!)
                 }
             })
-            self.deleteRowsAtIndexPaths(indexPathsToDelete as! [NSIndexPath], withRowAnimation: closeAnimation)
+            self.deleteRows(at: indexPathsToDelete as! [IndexPath], with: closeAnimation)
             self.endUpdates()
         }
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         var numOfRows: Int = 0
-        if self.subclassDataSource.respondsToSelector(#selector(UITableViewDataSource.tableView(_:numberOfRowsInSection:))) {
+        if self.subclassDataSource.responds(to: #selector(UITableViewDataSource.tableView(_:numberOfRowsInSection:))) {
             numOfRows = self.subclassDataSource.tableView(tableView, numberOfRowsInSection: section)
         }
         self.numOfRowsForSection[section] = numOfRows
         return (self.isSectionOpen(section)) ? numOfRows : 0
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // We implement this purely to satisfy the Xcode UITableViewDataSource warning
-        return self.subclassDataSource.tableView(tableView, cellForRowAtIndexPath: indexPath)
+        return self.subclassDataSource.tableView(tableView, cellForRowAt: indexPath)
     }
     
-    func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         //if self.subclassDelegate.respondsToSelector(#selector(UITableViewDelegate.tableView(_:viewForHeaderInSection:))) {
         if let headerView = self.subclassDelegate.tableView!(tableView, viewForHeaderInSection: section) as? AccordionTableViewHeaderView {
             headerView.section = section
@@ -339,5 +341,83 @@ class AccordionTableView: UITableView, UITableViewDataSource, UITableViewDelegat
             return headerView
         }
         return UIView()
+    }
+    
+    public func numberOfSections(in tableView: UITableView) -> Int {
+        print(self.subclassDataSource.numberOfSections!(in: tableView))
+        return self.subclassDataSource.numberOfSections!(in: tableView)
+    }
+    
+    public func tableView(_ tableView: UITableView, estimatedHeightForHeaderInSection section: Int) -> CGFloat {
+        return self.subclassDelegate.tableView!(tableView, estimatedHeightForHeaderInSection: section)
+    }
+    
+    public func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return self.subclassDelegate.tableView!(tableView, heightForFooterInSection: section)
+    }
+    
+    public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return self.subclassDelegate.tableView!(tableView, heightForHeaderInSection: section)
+    }
+
+    /*
+    public func tableView(tableView: UITableView, didHighlightRowAtIndexPath indexPath: NSIndexPath) {
+        let cell = tableView.cellForRowAtIndexPath(indexPath)
+        //cell.accessoryView?.tintColor = UIColor(hexString: "#ffffffff")
+        cell!.tintColor = UIColor(hexString: "#ffffffff")
+    }
+    
+    public func tableView(tableView: UITableView, didUnhighlightRowAtIndexPath indexPath: NSIndexPath) {
+        let gesture = tableView.gestureRecognizers![1] as! UIPanGestureRecognizer
+        let velocity = gesture.velocityInView(tableView)
+        print("indexPath.section \(indexPath.section)")
+        print("indexPath.section \(indexPath.row)")
+        if velocity.x != 0.0 || velocity.y != 0.0 {
+            let cell = tableView.cellForRowAtIndexPath(indexPath)
+            //cell.accessoryView?.tintColor = UIColor(hexString: "#049fd9ff")
+            cell!.tintColor = UIColor(hexString: "#049fd9ff")
+        }
+    }
+    
+    public func tableView(tableView: UITableView, didDeselectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        let cell = tableView.cellForRowAtIndexPath(indexPath)
+        //cell.accessoryView?.tintColor = UIColor(hexString: "#049fd9ff")
+        cell!.tintColor = UIColor(hexString: "#049fd9ff")
+    }
+    
+    
+    public func tableView(tableView: UITableView, willDeselectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
+        let cell = tableView.cellForRowAtIndexPath(indexPath)
+        //cell.accessoryView?.tintColor = UIColor(hexString: "#049fd9ff")
+        cell!.tintColor = UIColor(hexString: "#049fd9ff")
+        return indexPath
+    }*/
+}
+
+extension UIColor {
+    public convenience init?(hexString: String) {
+        let r, g, b, a: CGFloat
+        
+        if hexString.hasPrefix("#") {
+            let start = hexString.characters.index(hexString.startIndex, offsetBy: 1)
+            let hexColor = hexString.substring(from: start)
+            
+            if hexColor.characters.count == 8 {
+                let scanner = Scanner(string: hexColor)
+                var hexNumber: UInt64 = 0
+                
+                if scanner.scanHexInt64(&hexNumber) {
+                    r = CGFloat((hexNumber & 0xff000000) >> 24) / 255
+                    g = CGFloat((hexNumber & 0x00ff0000) >> 16) / 255
+                    b = CGFloat((hexNumber & 0x0000ff00) >> 8) / 255
+                    a = CGFloat(hexNumber & 0x000000ff) / 255
+                    
+                    self.init(red: r, green: g, blue: b, alpha: a)
+                    return
+                }
+            }
+        }
+        return nil
     }
 }

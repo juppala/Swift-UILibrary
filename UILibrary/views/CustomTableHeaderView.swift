@@ -8,15 +8,16 @@
 
 import UIKit
 
-class CustomTableHeaderView: AccordionTableViewHeaderView {
-    static let height: CGFloat = 40
-    static let reuseIdentifier = "TableHeaderViewIdentifier"
+open class CustomTableHeaderView: AccordionTableViewHeaderView {
+    open static let height: CGFloat = 40
+    open static let reuseIdentifier = "TableHeaderViewIdentifier"
     @IBOutlet weak var accordionIcon: UIImageView!
-    @IBOutlet weak var tableHeaderLabel: UILabel!
+    @IBOutlet open weak var tableHeaderLabel: UILabel!
+    @IBOutlet open weak var actionsButton: UIButton!
     
-    func animateAccordion(open open: Bool) {
-        UIView.animateWithDuration(0.25, animations: {
-            self.accordionIcon.transform = CGAffineTransformMakeRotation(open ? (90.0 * CGFloat(M_PI)) / 180.0 : 0)
+    open func animateAccordion(open: Bool) {
+        UIView.animate(withDuration: 0.25, animations: {
+            self.accordionIcon.transform = CGAffineTransform(rotationAngle: open ? (90.0 * CGFloat(M_PI)) / 180.0 : 0)
         })
     }
 }
